@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import Field, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -14,7 +15,7 @@ class Settings(BaseSettings):
     # Application
     app_name: str = Field(alias="APP_NAME")
     app_version: str = Field(alias="APP_VERSION")
-    app_env: str = Field(alias="APP_ENV")
+    app_env: Literal["development", "testing", "production"] = Field(alias="APP_ENV")
     debug: bool = Field(alias="DEBUG")
 
     # Server
@@ -33,7 +34,65 @@ class Settings(BaseSettings):
     redis_port: int = Field(alias="REDIS_PORT")
 
     # Logging
-    log_level: str = Field(alias="LOG_LEVEL")
+    log_level: Literal[
+        "DEBUG",
+        "INFO",
+        "WARNING",
+        "ERROR",
+        "CRITICAL",
+    ] = Field(alias="LOG_LEVEL")
+
+    # GitLab
+    gitlab_webhook_secret: str = Field(alias="GITLAB_WEBHOOK_SECRET")
+    gitlab_url: str = Field(alias="GITLAB_URL")
+    gitlab_access_token: str = Field(alias="GITLAB_ACCESS_TOKEN")
+
+    embedding_model: str = Field(
+        default="sentence-transformers/all-MiniLM-L6-v2",
+        alias="EMBEDDING_MODEL",
+    )
+
+    chroma_path: str = Field(
+        default="./data/chroma",
+        alias="CHROMA_PATH",
+    )
+
+    gemini_api_key: str = Field(
+    alias="GEMINI_API_KEY"
+    )
+
+    gemini_model: str = Field(
+        default="gemini-2.5-flash",
+        alias="GEMINI_MODEL",
+    )
+
+    # Slack Integration
+    slack_bot_token: str = Field(
+        default="",
+        alias="SLACK_BOT_TOKEN",
+    )
+    slack_webhook_url: str = Field(
+        default="",
+        alias="SLACK_WEBHOOK_URL",
+    )
+    slack_default_channel: str = Field(
+        default="#code-reviews",
+        alias="SLACK_DEFAULT_CHANNEL",
+    )
+
+    # Google Sheets Analytics Integration
+    google_sheets_spreadsheet_id: str = Field(
+        default="",
+        alias="GOOGLE_SHEETS_SPREADSHEET_ID",
+    )
+    google_sheets_credentials_file: str = Field(
+        default="",
+        alias="GOOGLE_SHEETS_CREDENTIALS_FILE",
+    )
+    google_sheets_webhook_url: str = Field(
+        default="",
+        alias="GOOGLE_SHEETS_WEBHOOK_URL",
+    )
 
     @computed_field
     @property

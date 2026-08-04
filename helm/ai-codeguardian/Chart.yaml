@@ -1,0 +1,11 @@
+apiVersion: v2
+name: ai-codeguardian
+description: Helm Chart for AI CodeGuardian Enterprise Code Review Engine
+type: application
+version: 1.0.0
+appVersion: "2.5.0"
+keywords:
+  - code-review
+  - ai
+  - gitlab
+  - security

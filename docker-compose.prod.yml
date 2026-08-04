@@ -1,0 +1,135 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: codeguardian_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: codeguardian_prod
+      POSTGRES_USER: guardian_user
+      POSTGRES_PASSWORD: guardian_prod_password_change_me
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U guardian_user -d codeguardian_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - codeguardian_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: codeguardian_redis
+    restart: always
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - codeguardian_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: codeguardian_backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://guardian_user:guardian_prod_password_change_me@postgres:5432/codeguardian_prod
+      REDIS_URL: redis://redis:6379/0
+      ENVIRONMENT: production
+      API_KEY: dev-secret-api-key
+      GITLAB_WEBHOOK_SECRET: dev-secret-token
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - codeguardian_net
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: codeguardian_celery_worker
+    restart: always
+    command: celery -A app.workers.celery_app worker --loglevel=info -c 4
+    environment:
+      DATABASE_URL: postgresql://guardian_user:guardian_prod_password_change_me@postgres:5432/codeguardian_prod
+      REDIS_URL: redis://redis:6379/0
+      ENVIRONMENT: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - codeguardian_net
+
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: codeguardian_celery_beat
+    restart: always
+    command: celery -A app.workers.celery_app beat --loglevel=info
+    environment:
+      DATABASE_URL: postgresql://guardian_user:guardian_prod_password_change_me@postgres:5432/codeguardian_prod
+      REDIS_URL: redis://redis:6379/0
+      ENVIRONMENT: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - codeguardian_net
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: codeguardian_prometheus
+    restart: always
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - codeguardian_net
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: codeguardian_grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin_prod_password_change_me
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - codeguardian_net
+
+networks:
+  codeguardian_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:

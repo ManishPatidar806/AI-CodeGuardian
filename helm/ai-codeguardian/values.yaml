@@ -1,0 +1,39 @@
+replicaCount: 3
+
+image:
+  repository: ai-codeguardian/backend
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+env:
+  ENVIRONMENT: production
+  LOG_LEVEL: INFO
+  REVIEW_SCORE_THRESHOLD: "80.0"
+  AUTO_MERGE_SCORE_THRESHOLD: "85.0"
+  LLM_MODEL: gemini-2.5-flash
+
+secrets:
+  DATABASE_URL: "postgresql://user:pass@postgres:5432/codeguardian"
+  REDIS_URL: "redis://redis:6379/0"
+  API_KEY: "change-me-in-production"
+  GITLAB_WEBHOOK_SECRET: "change-me-in-production"

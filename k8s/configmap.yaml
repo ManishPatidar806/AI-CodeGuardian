@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: codeguardian-config
+  namespace: ai-codeguardian
+data:
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+  REVIEW_SCORE_THRESHOLD: "80.0"
+  AUTO_MERGE_SCORE_THRESHOLD: "85.0"
+  LLM_MODEL: "gemini-2.5-flash"
