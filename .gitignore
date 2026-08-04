@@ -1,9 +1,91 @@
+# ==========================================
+# AI CodeGuardian - Root .gitignore
+# ==========================================
+
+# Environment & Secrets (DO NOT COMMIT SECRETS)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+*.pem
+*.key
+*.cert
+*.crt
+
+# Python & Virtual Environments
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+.uv/
+*.egg-info/
+.eggs/
+dist-python/
+
+# Testing, Linting & Coverage
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-.venv/
-.env
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+coverage.xml
+
+# Databases, Vector Storage & Logs
+*.db
+*.sqlite
+*.sqlite3
+sql_app.db
+chroma/
+chroma_db/
+data/
+backend/data/
+*.log
+logs/
+celerybeat-schedule
+celerybeat.pid
+
+# Node.js & Frontend Build Artifacts
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+build/
+frontend/build/
+.vite/
+frontend/.vite/
+.next/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json.bak
+
+# IDE & Editor Files
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS & System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+
+# Temporary Scratch Files
+tmp/
+temp/
+scratch/
